@@ -1,0 +1,16 @@
+.rowOfPictures {
+    display: flex;
+}
+.imagePairs {
+    border-style: dashed;
+    text-align: center;
+    margin: 15px;
+    
+}
+.emptySpace {
+    height: 100px;
+}
+img {
+    height: 100px;
+    margin: 10px;
+}
