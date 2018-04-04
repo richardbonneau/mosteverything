@@ -2,18 +2,37 @@ var assert = require('assert');
 
 // we need 5 test cases. 
 let inputs = [
-  
+    [1, 2, 5],
+    [2, "cat", 1],
+    [],
+    [4, 2, "ok", 2],
+    [5, -5]
 ]
 
 let outputs = [
-  
+    8,
+    3,
+    0,
+    8,
+    0
 ]
 
 /*
-Make this function return the sum of all the numbers in the input array. If any element in the array is not a number, skip it. If the array is empty, return zero.
+Make this function return the sum of all the numbers in the input array. 
+If any element in the array is not a number, skip it. If the array is empty, return zero.
 */
 function f(arr) {
-    
+    if(arr.length===0) {
+        return 0
+    }else {
+        var result=0;
+        for(var i=0; i<arr.length; i++) {
+            if(typeof(arr[i])==="number" ) {
+                result+=arr[i];
+            }
+        }
+        return result;
+    }
 }
 
 function runTest(i) {
