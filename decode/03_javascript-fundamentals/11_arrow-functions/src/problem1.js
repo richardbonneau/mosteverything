@@ -6,8 +6,11 @@ function c(g, h) {
 }
 
 function t() {
-    return c( x => return y + 2, (x,y) => return x + y);
+    return c( x => x + 2, (x,y) => x + y);
 }
+
+//var g = function(x){return y+2}
+//var h = function(x,y){return x+y}
 
 module.exports = t
 

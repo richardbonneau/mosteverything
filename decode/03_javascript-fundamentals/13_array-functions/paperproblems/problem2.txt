@@ -14,3 +14,4 @@ var letterN = animals.filter(function(animal) {
 });
 
 console.log(letterN[0].name);
+
