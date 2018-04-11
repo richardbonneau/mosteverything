@@ -1,0 +1,19 @@
+body {
+    background-color: black;
+}
+#announcer {
+    text-align: center;
+    color:red;
+}
+#timer {
+    text-align: center;
+    color: white;
+}
+#buttonDiv {
+    text-align: center;
+}
+#startButton {
+    width: 30%;
+    height:10%;
+    font-size: 250%;
+}

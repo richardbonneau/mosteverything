@@ -1,0 +1,19 @@
+body {
+    background-color: black;
+}
+#buttonHold {
+    text-align: center;
+}
+#restartButton {
+    font-size : 135%;
+    width: 15%;
+    height: 10%;
+}
+#announcer {
+    color:red;
+    text-align: center;
+}
+#secondAnnouncer {
+    color: grey;
+    text-align: center;
+}

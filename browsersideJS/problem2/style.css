@@ -1,0 +1,11 @@
+body {
+    background-color: black;
+}
+#announcer {
+    text-align: center;
+    color:red;
+}
+#timer {
+    text-align: center;
+    color: white;
+}

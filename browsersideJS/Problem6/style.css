@@ -1,0 +1,35 @@
+body {
+    background-color: black;
+}
+#buttonHold {
+    text-align: center;
+}
+#startButton {
+    font-size : 250%;
+    width: 30%;
+    height: 10%;
+}
+#announcer {
+    color:red;
+    text-align: center;
+}
+#timer {
+    color:white;
+    text-align: center;
+}
+#newButton {
+    
+    
+    width: 25%;
+    height:25%;
+    
+}
+#flexBox {
+    display: flex;
+    height:16%;
+}
+.buttonSpawn {
+    flex-grow: 1;
+    /*height: 33%;
+    width: 33%;*/
+}
