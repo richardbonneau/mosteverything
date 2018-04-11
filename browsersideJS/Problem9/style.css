@@ -1,0 +1,33 @@
+#game {
+    display:flex;
+    position: fixed;
+    bottom: 25%;
+    width: 100%;
+    justify-content: space-evenly;
+}
+html {
+    background-color: cornflowerblue;
+    background-image: url("graphics/background1.png");
+    background-size: contain;
+}
+.players {
+}
+#emptySpace {
+    width: 128;
+}
+#buttonHold {
+    text-align: center;
+}
+#restartButton {
+    font-size : 135%;
+    width: 15%;
+    height: 10%;
+}
+#announcer {
+    color:black;
+    text-align: center;
+}
+#secondAnnouncer {
+    color: grey;
+    text-align: center;
+}
