@@ -1,0 +1,26 @@
+<html>
+        <head><LINK href="style.css" rel="stylesheet" type="text/css"></head>
+            <body>
+                    
+                    <h1 id="announcer">Get ready...</h1>
+                    <h2 id="secondAnnouncer">Player one draws with Q<br>Player two draws with P</h2>
+                    <div id="buttonHold"></div>
+                    <div id="scores">
+                        <div id="p1score" class="scores">0</div>
+                        <div id="emptySpace"></div>
+                        <div id="p2score" class="scores">0</div>
+                    </div>
+                    <div id="game">
+                        <img class="players" src ="graphics/player1_state1.png">
+                        <div id="emptySpace"></div>
+                        <img class="players" src ="graphics/player2_state1.png">
+                    </div>
+                    <audio id="music"><source src="sounds/music.mp3"></audio>
+                    <audio id="ready"><source src="sounds/ready.wav"></audio>
+                    <audio id="bang"><source src="sounds/fight.wav"></audio>
+                    <audio id="nextRound"><source src="sounds/nextRound.wav"></audio>
+                    <audio id="sword"><source src="sounds/sword.wav"></audio>
+                    <audio id="swordTooSoon"><source src="sounds/swordTooEarly.wav"></audio>
+                <script src="app.js"></script>
+            </body>
+</html>
