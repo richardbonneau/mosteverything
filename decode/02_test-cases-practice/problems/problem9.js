@@ -21,12 +21,13 @@ let outputs = [
 Make this function return the longest word in the input string. If the input string is empty then return an empty string.
 If multiple words have the same length, return the last one that matches.
 */
+
 function f(str) {
-    var tempArr = str.split(" ");
+    var arr = str.split(" ");
     var wordWithMostChar = "";
-    for(var i=0; i<tempArr.length; i++) {
-        if(tempArr[i].length>=wordWithMostChar.length) {
-            wordWithMostChar = tempArr[i];
+    for(var i=0; i<arr.length; i++) {
+        if(arr[i].length>=wordWithMostChar.length) {
+            wordWithMostChar = arr[i];
         }
     }
     return wordWithMostChar;

@@ -38,7 +38,6 @@ class h3 {
     }
 }
 
-
 class div {
     constructor(children) {
         this.children = children;
@@ -52,7 +51,9 @@ class div {
     }
 }
 
-
-
 populate(document.getElementById('root'),
-    new div([new h1("I love javascript")]))
+    new div([new h1("I love javascript"), 
+    new h2("so much"),
+    new h3("I'm not kidding")
+ ]))
+    

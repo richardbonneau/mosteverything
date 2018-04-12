@@ -18,7 +18,28 @@ class div {
         return ret;
     }
 }
-
+class ul {
+    constructor(children) {
+        this.children = children;
+    }
+    render() {
+        var ret = document.createElement("ul");
+        for(var i =0; i<this.children.length; i++) {
+            ret.appendChild(this.children[i].render())
+        }
+        return ret;
+    }
+}
+class li {
+    constructor(listItem) {
+        this.listItem = listItem;
+    }
+    render() {
+        var ret = document.createElement("li");
+        ret.innerText = this.listItem;
+        return ret;
+    }
+}
 class h1 {
     constructor(text) {
         this.text = text;

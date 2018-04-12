@@ -34,7 +34,7 @@ f(["foo", -1]) // undefined
 */
 function f(arr) {
     if(typeof(arr[1])!="number" || arr[1]<=0) {
-        return undefined
+        return 
     }else {
         var tmp = "";
         for(var i=0; i<arr[1]; i++) {

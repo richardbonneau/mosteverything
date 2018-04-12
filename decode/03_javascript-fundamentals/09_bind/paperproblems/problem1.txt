@@ -3,7 +3,7 @@ What is the output of this program?
 'use strict';
 
 var obj = {
-    bar: function() {console.log(this.baz);},
+    bar: function() {console.log(this.baz);}console log the baz of this object
     baz: 12
 }
 
