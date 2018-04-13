@@ -1,6 +1,9 @@
 // This sectin contains some game constants. It is not super interesting
-var GAME_WIDTH = 375;
+var GAME_WIDTH = 750;
 var GAME_HEIGHT = 500;
+
+var ROAD_DEADSPACE_LEFT = 150;
+var ROAD_DEADSPACE_RIGHT = GAME_WIDTH-150;
 
 var ENEMY_WIDTH = 75;
 var ENEMY_HEIGHT = 156;
@@ -19,7 +22,7 @@ var MOVE_RIGHT = 'right';
 
 // Preload game images
 var images = {};
-['enemy.png', 'stars.png', 'player.png'].forEach(imgName => {
+['enemy.png', 'background1.png', "background2.png", 'player.png'].forEach(imgName => {
     var img = document.createElement('img');
     img.src = 'images/' + imgName;
     images[imgName] = img;
@@ -57,6 +60,7 @@ class Player {
     }
 
     // This method is called by the game engine when left/right arrows are pressed
+    //  **Change this for smooth movement
     move(direction) {
         if (direction === MOVE_LEFT && this.x > 0) {
             this.x = this.x - PLAYER_WIDTH;
@@ -167,7 +171,7 @@ class Engine {
         this.enemies.forEach(enemy => enemy.update(timeDiff));
 
         // Draw everything!
-        this.ctx.drawImage(images['stars.png'], 0, 0); // draw the star bg
+        this.ctx.drawImage(images['background1.png'], 0, 0); // draw the star bg
         this.enemies.forEach(enemy => enemy.render(this.ctx)); // draw the enemies
         this.player.render(this.ctx); // draw the player
 
