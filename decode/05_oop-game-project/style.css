@@ -1,0 +1,19 @@
+.container {
+    /*height: 650px;
+    width:840px;*/
+    overflow: hidden;
+}
+.scrollingBackground {
+    background: url("images/background.png") repeat-x;
+    width: 840px;
+    height: 1300px;
+    animation: slide 60s linear infinite;
+}
+@keyframes slide {
+    0%{
+      transform: translate3d(0, 0, 0);
+    }
+    100%{
+      transform: translate3d(-840, 0, 0); 
+    }
+}

@@ -1,16 +1,16 @@
 // This sectin contains some game constants. It is not super interesting
-var GAME_WIDTH = 750;
-var GAME_HEIGHT = 500;
+var GAME_WIDTH = 840;
+var GAME_HEIGHT = 650;
 
-var ROAD_DEADSPACE_LEFT = 150;
-var ROAD_DEADSPACE_RIGHT = GAME_WIDTH-150;
+var ROAD_DEADSPACE_LEFT = 175;
+var ROAD_DEADSPACE_RIGHT = GAME_WIDTH-175;
 
-var ENEMY_WIDTH = 75;
-var ENEMY_HEIGHT = 156;
+var ENEMY_WIDTH = 100;
+var ENEMY_HEIGHT = 115;
 var MAX_ENEMIES = 3;
 
-var PLAYER_WIDTH = 75;
-var PLAYER_HEIGHT = 54;
+var PLAYER_WIDTH = 100;
+var PLAYER_HEIGHT = 128;
 
 // These two constants keep us from using "magic numbers" in our code
 var LEFT_ARROW_CODE = 37;
@@ -22,7 +22,7 @@ var MOVE_RIGHT = 'right';
 
 // Preload game images
 var images = {};
-['enemy.png', 'background1.png', "background2.png", 'player.png'].forEach(imgName => {
+["viper_south.png", "viper_north.png" ,"background.png", "player.png"].forEach(imgName => {
     var img = document.createElement('img');
     img.src = 'images/' + imgName;
     images[imgName] = img;
@@ -34,13 +34,21 @@ var images = {};
 
 // This section is where you will be doing most of your coding
 class Enemy {
-    constructor(xPos) {
+    constructor(xPos, carPos) {
         this.x = xPos;
         this.y = -ENEMY_HEIGHT;
-        this.sprite = images['enemy.png'];
+        // Each enemy should have a different speed and direction
+        if(carPos == 0||carPos == 1) {
+        this.sprite = images["viper_south.png"];
+        this.speed = Math.random() / 1 + 0.50;
+        } 
+        else if (carPos == 2||carPos == 3) {
+            this.sprite = images["viper_north.png"];
+            this.speed = Math.random() / 10 + 0.10;
+        }
 
-        // Each enemy should have a different speed
-        this.speed = Math.random() / 2 + 0.25;
+
+        
     }
 
     update(timeDiff) {
@@ -76,9 +84,6 @@ class Player {
 }
 
 
-
-
-
 /*
 This section is a tiny game engine.
 This engine will use your Enemy and Player classes to create the behavior of the game.
@@ -98,6 +103,11 @@ class Engine {
         canvas.height = GAME_HEIGHT;
         element.appendChild(canvas);
 
+
+        /*var scrollingBackground = document.createElement("div");
+        scrollingBackground.setAttribute("class", "scrollingBackground")
+        canvas.appendChild(scrollingBackground);*/
+
         this.ctx = canvas.getContext('2d');
 
         // Since gameLoop will be called out of context, bind it once here.
@@ -112,7 +122,6 @@ class Engine {
         if (!this.enemies) {
             this.enemies = [];
         }
-
         while (this.enemies.filter(e => !!e).length < MAX_ENEMIES) {
             this.addEnemy();
         }
@@ -120,15 +129,21 @@ class Engine {
 
     // This method finds a random spot where there is no enemy, and puts one in there
     addEnemy() {
-        var enemySpots = GAME_WIDTH / ENEMY_WIDTH;
 
+        var enemySpots = 3.5;
+        //console.log(enemySpots)
         var enemySpot;
         // Keep looping until we find a free enemy spot at random
-        while (!enemySpot || this.enemies[enemySpot]) {
+        while (enemySpot === undefined || this.enemies[enemySpot]) {
             enemySpot = Math.floor(Math.random() * enemySpots);
         }
-
-        this.enemies[enemySpot] = new Enemy(enemySpot * ENEMY_WIDTH);
+        function spawnPoint() {
+            if(enemySpot == 0) return 164;
+            else if (enemySpot == 1) return 292;
+            else if (enemySpot == 2) return 420;
+            else return 548;
+        }
+        this.enemies[enemySpot] = new Enemy( spawnPoint(), enemySpot );
     }
 
     // This method kicks off the game
@@ -171,7 +186,7 @@ class Engine {
         this.enemies.forEach(enemy => enemy.update(timeDiff));
 
         // Draw everything!
-        this.ctx.drawImage(images['background1.png'], 0, 0); // draw the star bg
+        //this.ctx.drawImage(images['background.png'], 0, 0); // draw the star bg
         this.enemies.forEach(enemy => enemy.render(this.ctx)); // draw the enemies
         this.player.render(this.ctx); // draw the player
 
@@ -204,7 +219,16 @@ class Engine {
 
     isPlayerDead() {
         // TODO: fix this function!
-        return false;
+        for (var i=0; i<this.enemies.length; i++) {
+            if (this.enemies[i] == undefined) return false;
+            else if(this.player.x < this.enemies[i].x + ENEMY_WIDTH &&
+               this.player.x + PLAYER_WIDTH > this.enemies[i].x &&
+               this.player.y < this.enemies[i].y + ENEMY_HEIGHT &&
+               this.player.y + PLAYER_HEIGHT > this.enemies[i].y) {
+                   return true;
+               }
+            }
+            return false;
     }
 }
 
