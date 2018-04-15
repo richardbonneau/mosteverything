@@ -1,24 +1,36 @@
 // This sectin contains some game constants. It is not super interesting
+var frameOne = false;
+
 var GAME_WIDTH = 840;
 var GAME_HEIGHT = 650;
 
 var ROAD_DEADSPACE_LEFT = 175;
 var ROAD_DEADSPACE_RIGHT = GAME_WIDTH-175;
 
-var ENEMY_WIDTH = 100;
-var ENEMY_HEIGHT = 115;
+var ENEMY_WIDTH = 50;
+var ENEMY_HEIGHT = 95;
 var MAX_ENEMIES = 3;
 
-var PLAYER_WIDTH = 100;
-var PLAYER_HEIGHT = 128;
+var PLAYER_WIDTH = 50;
+var PLAYER_HEIGHT = 95;
 
 // These two constants keep us from using "magic numbers" in our code
 var LEFT_ARROW_CODE = 37;
+var UP_ARROW_CODE = 38;
 var RIGHT_ARROW_CODE = 39;
+var DOWN_ARROW_CODE = 40;
 
 // These two constants allow us to DRY
+var MOVE_UP = "up";
+var MOVE_DOWN = "down"
 var MOVE_LEFT = 'left';
 var MOVE_RIGHT = 'right';
+
+//  Smooth controls
+var playerMoveLeft = false;
+var playerMoveRight = false;
+var playerMoveUp = false;
+var playerMoveDown = false;
 
 // Preload game images
 var images = {};
@@ -27,9 +39,6 @@ var images = {};
     img.src = 'images/' + imgName;
     images[imgName] = img;
 });
-
-
-
 
 
 // This section is where you will be doing most of your coding
@@ -45,16 +54,11 @@ class Enemy {
         else if (carPos == 2||carPos == 3) {
             this.sprite = images["viper_north.png"];
             this.speed = Math.random() / 10 + 0.10;
-        }
-
-
-        
+        }        
     }
-
     update(timeDiff) {
         this.y = this.y + timeDiff * this.speed;
     }
-
     render(ctx) {
         ctx.drawImage(this.sprite, this.x, this.y);
     }
@@ -62,28 +66,37 @@ class Enemy {
 
 class Player {
     constructor() {
-        this.x = 2 * PLAYER_WIDTH;
+        this.x = 15 * PLAYER_WIDTH;
         this.y = GAME_HEIGHT - PLAYER_HEIGHT - 10;
         this.sprite = images['player.png'];
+        //added by richard
+        this.speed = 0.5; 
     }
 
     // This method is called by the game engine when left/right arrows are pressed
-    //  **Change this for smooth movement
+    // 
     move(direction) {
-        if (direction === MOVE_LEFT && this.x > 0) {
-            this.x = this.x - PLAYER_WIDTH;
+        if (direction === MOVE_LEFT/* && this.x > 0*/) {
+            playerMoveLeft=true;
+        } else if (direction === MOVE_RIGHT/* && this.x < GAME_WIDTH - PLAYER_WIDTH*/) {
+            playerMoveRight = true;
+        } else if (direction === MOVE_UP/* && this.x < GAME_WIDTH - PLAYER_WIDTH*/) {
+            playerMoveUp = true;
+        } else if (direction === MOVE_DOWN/* && this.x < GAME_WIDTH - PLAYER_WIDTH*/) {
+            playerMoveDown = true;
         }
-        else if (direction === MOVE_RIGHT && this.x < GAME_WIDTH - PLAYER_WIDTH) {
-            this.x = this.x + PLAYER_WIDTH;
-        }
+    }
+    update(timeDiff) {
+        this.x = this.x + timeDiff * this.speed;
+    }
+    updateVertical(timeDiff) {
+        this.y = this.y + timeDiff * this.speed;
     }
 
     render(ctx) {
         ctx.drawImage(this.sprite, this.x, this.y);
     }
 }
-
-
 /*
 This section is a tiny game engine.
 This engine will use your Enemy and Player classes to create the behavior of the game.
@@ -103,13 +116,8 @@ class Engine {
         canvas.height = GAME_HEIGHT;
         element.appendChild(canvas);
 
-
-        /*var scrollingBackground = document.createElement("div");
-        scrollingBackground.setAttribute("class", "scrollingBackground")
-        canvas.appendChild(scrollingBackground);*/
-
         this.ctx = canvas.getContext('2d');
-
+        
         // Since gameLoop will be called out of context, bind it once here.
         this.gameLoop = this.gameLoop.bind(this);
     }
@@ -131,7 +139,6 @@ class Engine {
     addEnemy() {
 
         var enemySpots = 3.5;
-        //console.log(enemySpots)
         var enemySpot;
         // Keep looping until we find a free enemy spot at random
         while (enemySpot === undefined || this.enemies[enemySpot]) {
@@ -152,15 +159,29 @@ class Engine {
         this.lastFrame = Date.now();
 
         // Listen for keyboard left/right and update the player
-        document.addEventListener('keydown', e => {
-            if (e.keyCode === LEFT_ARROW_CODE) {
+        document.addEventListener('keydown', key => {
+            if (key.keyCode === LEFT_ARROW_CODE) {
                 this.player.move(MOVE_LEFT);
-            }
-            else if (e.keyCode === RIGHT_ARROW_CODE) {
+            } else if (key.keyCode === RIGHT_ARROW_CODE) {
                 this.player.move(MOVE_RIGHT);
+            } else if (key.keyCode === UP_ARROW_CODE) {
+                this.player.move(MOVE_UP);
+            } else if (key.keyCode === DOWN_ARROW_CODE) {
+                this.player.move(MOVE_DOWN);
             }
-        });
 
+        })
+        document.addEventListener("keyup", up => {
+            if(up.keyCode === LEFT_ARROW_CODE) {
+                playerMoveLeft = false;
+            } else if (up.keyCode === RIGHT_ARROW_CODE) {
+                playerMoveRight = false;
+            } else if (up.keyCode === UP_ARROW_CODE) {
+                playerMoveUp = false;
+            } else if (up.keyCode === DOWN_ARROW_CODE) {
+                playerMoveDown = false;
+            }
+        })
         this.gameLoop();
     }
 
@@ -175,6 +196,7 @@ class Engine {
     You should use this parameter to scale your update appropriately
      */
     gameLoop() {
+        console.log("playerup",playerMoveUp, "playerdown", playerMoveDown)
         // Check how long it's been since last frame
         var currentFrame = Date.now();
         var timeDiff = currentFrame - this.lastFrame;
@@ -184,9 +206,21 @@ class Engine {
 
         // Call update on all enemies
         this.enemies.forEach(enemy => enemy.update(timeDiff));
+        //  Call update on the player
+        if(playerMoveLeft === true) {
+            this.player.update(-timeDiff);
 
+        } else if(playerMoveRight === true) {
+            this.player.update(timeDiff);
+        }
+        if(playerMoveUp === true) {
+            this.player.updateVertical(-timeDiff);
+        } else if(playerMoveDown === true) {
+            this.player.updateVertical(timeDiff);
+        }
+        
         // Draw everything!
-        //this.ctx.drawImage(images['background.png'], 0, 0); // draw the star bg
+        this.ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
         this.enemies.forEach(enemy => enemy.render(this.ctx)); // draw the enemies
         this.player.render(this.ctx); // draw the player
 
@@ -204,6 +238,8 @@ class Engine {
             this.ctx.font = 'bold 30px Impact';
             this.ctx.fillStyle = '#ffffff';
             this.ctx.fillText(this.score + ' GAME OVER', 5, 30);
+
+            document.querySelector("@keyframes").setAttribute("style", "background-position:0px 0px;");
         }
         else {
             // If player is not dead, then draw the score
@@ -217,10 +253,11 @@ class Engine {
         }
     }
 
+
     isPlayerDead() {
         // TODO: fix this function!
         for (var i=0; i<this.enemies.length; i++) {
-            if (this.enemies[i] == undefined) return false;
+            if (this.enemies[i] == undefined) continue;
             else if(this.player.x < this.enemies[i].x + ENEMY_WIDTH &&
                this.player.x + PLAYER_WIDTH > this.enemies[i].x &&
                this.player.y < this.enemies[i].y + ENEMY_HEIGHT &&
@@ -231,10 +268,6 @@ class Engine {
             return false;
     }
 }
-
-
-
-
 
 // This section will start the game
 var gameEngine = new Engine(document.getElementById('app'));

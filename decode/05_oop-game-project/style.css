@@ -1,19 +1,18 @@
-.container {
-    /*height: 650px;
-    width:840px;*/
-    overflow: hidden;
-}
-.scrollingBackground {
-    background: url("images/background.png") repeat-x;
+.background {
+    z-index:-1;
+    position: fixed;
+    background:url("images/background.png");
+    animation:2.2s scroll infinite linear;
+    top:0;
+    left:0;
     width: 840px;
-    height: 1300px;
-    animation: slide 60s linear infinite;
+    height: 100%;   
 }
-@keyframes slide {
-    0%{
-      transform: translate3d(0, 0, 0);
-    }
+@keyframes scroll{
     100%{
-      transform: translate3d(-840, 0, 0); 
+      background-position:0px 2504px;
     }
+  }
+canvas {
+    background: transparent;
 }
