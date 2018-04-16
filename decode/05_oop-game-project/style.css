@@ -13,6 +13,36 @@
       background-position:0px 2504px;
     }
   }
+@font-face {
+    font-family: "lazer84";
+    src: url("misc/Lazer84.ttf");
+}
+@font-face {
+    font-family: "streamster";
+    src: url("misc/Streamster.ttf");
+}
+@font-face {
+    font-family: "vcr";
+    src: url("misc/vcrmono.ttf");
+}
+
 canvas {
     background: transparent;
 }
+/*
+#testLazer {
+    font-family: "lazer84";
+    font-size: 60px;
+    color: #24006D;
+}
+
+#testStreamster {
+    font-family: "streamster";
+    font-size: 70px;
+    color: #EE209A;
+}
+#vcr {
+    font-family: "vcr";
+    font-size: 70px;
+    color: white;
+}*/

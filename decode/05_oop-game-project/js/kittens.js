@@ -4,15 +4,17 @@ var frameOne = false;
 var GAME_WIDTH = 840;
 var GAME_HEIGHT = 650;
 
-var ROAD_DEADSPACE_LEFT = 175;
-var ROAD_DEADSPACE_RIGHT = GAME_WIDTH-175;
+var ROAD_DEADSPACE_LEFT = 90;
+var ROAD_DEADSPACE_RIGHT = GAME_WIDTH-180;
+var middleOfRoad = 375;
+var leftLaneWidth = 250;
 
-var ENEMY_WIDTH = 50;
-var ENEMY_HEIGHT = 110;
+var ENEMY_WIDTH = 45;
+var ENEMY_HEIGHT = 105;
 var MAX_ENEMIES = 3;
 
 var PLAYER_WIDTH = 50;
-var PLAYER_HEIGHT = 110;
+var PLAYER_HEIGHT = 105;
 
 // These two constants keep us from using "magic numbers" in our code
 var LEFT_ARROW_CODE = 37;
@@ -33,9 +35,21 @@ var playerMoveUp = false;
 var playerMoveDown = false;
 
 //  Has this car already been overtaken?
-var overtaken = [false, false, false , false];
-var timeout;
-var opacity= 1.0;
+var overtaken = [false, false, false, false];
+
+//  Score Announcer Stuff
+var overtakeTimeout;
+var closeCallTimeout;
+var freezeCurrentScore = 0;
+var plusScore = "";
+var secondPlusScore = "";
+var tempShowScore = 0;
+var opacityOvertake= 0;
+var opacityOppositeLane = 0;
+var opacityCloseCall = 0;
+var isDrivingOppositeLane = false;
+var isOvertaking = false;
+var isScoreGoingUp = false;
 
 // Preload game images
 var images = {};
@@ -80,7 +94,7 @@ class Enemy {
 
 class Player {
     constructor() {
-        this.x = 15 * PLAYER_WIDTH;
+        this.x = 10 * PLAYER_WIDTH;
         this.y = GAME_HEIGHT - PLAYER_HEIGHT - 10;
         this.sprite = images['player.png'];
         //added by richard
@@ -171,7 +185,9 @@ class Engine {
     start() {
         this.score = 0;
         this.lastFrame = Date.now();
-        this.announce = "";
+        this.announceOvertake = "";
+        this.announceOppositeLane = "";
+        this.announceCloseCall = "";
 
         // Listen for keyboard left/right and update the player
         document.addEventListener('keydown', key => {
@@ -254,56 +270,81 @@ class Engine {
             this.ctx.font = 'bold 30px Impact';
             this.ctx.fillStyle = '#ffffff';
             this.ctx.fillText(this.score + ' GAME OVER', 5, 30);
-            console.log(this.ctx.fillStyle);
+
             this.ctx.closePath();
 
             document.querySelector(".background").setAttribute("style", "animation: 0s");
         }
         else {
             // If player is not dead, then draw the score and announcements
-            this.ctx.font = 'bold 30px Impact';
-            //this.ctx.fillStyle = '#ffffff';
-            this.ctx.fillText(this.score, 5, 30);
-
-            /*this.ctx.font = 'bold 30px Impact';
-            this.ctx.fillStyle = '#ffffff';
-            this.ctx.fillText(this.announce, GAME_WIDTH/2, 60);*/
-
+    
+            //  Total Score
             this.ctx.beginPath();
-            this.ctx.fillStyle = "rgba(255, 0, 0, "+ opacity +")";
-            this.ctx.font = "bold 30px Impact";
-            this.ctx.fillText(this.announce, GAME_WIDTH/2, 60);
-            opacity = opacity - 0.01;
-            console.log(this.ctx.fillStyle);
+            if(isScoreGoingUp === true) {this.ctx.fillStyle = '#FFFFFF';}
+            else {this.ctx.fillStyle = '#EE209A';}
+            this.ctx.font = '45px lazer84';
+            this.ctx.fillText(this.score, 15, 50);
             this.ctx.closePath();
-            console.log(this.ctx.fillStyle);
-            //console.log(opacity)
-            
-            /*function fadeOut(text) {
-                var alpha = 1.0,   // full opacity
-                    interval = setInterval(function () {
-                        canvas.width = canvas.width; // Clears the canvas
-                        context.fillStyle = "rgba(255, 0, 0, " + alpha + ")";
-                        context.font = "italic 20pt Arial";
-                        context.fillText(text, 50, 50);
-                        alpha = alpha - 0.05; // decrease opacity (fade out)
-                        if (alpha < 0) {
-                            canvas.width = canvas.width;
-                            clearInterval(interval);
-                        }
-                    }, 50); 
+
+            //  +Score
+            this.ctx.beginPath();
+            if(opacityOppositeLane > 0) this.ctx.fillStyle = "rgba(255, 255, 255, "+ opacityOppositeLane +")";
+            else if(opacityOvertake > 0) this.ctx.fillStyle = "rgba(255, 255, 255, "+ opacityOvertake +")";
+            //else this.ctx.fillStyle = "rgba(255, 255, 255, 0 )";
+            this.ctx.font = '25px vcr';
+            this.ctx.fillText(plusScore, 15, 80);
+            this.ctx.closePath();
+
+            //  SECOND+Score
+            this.ctx.beginPath();
+            this.ctx.fillStyle = "rgba(255, 255, 255, "+ opacityCloseCall +")";
+            this.ctx.font = '25px vcr';
+            this.ctx.fillText(secondPlusScore, 15, 110);
+            this.ctx.closePath();
+
+            //  Overtakes
+            this.ctx.beginPath();
+            this.ctx.fillStyle = "rgba(255, 255, 255, "+ opacityOvertake +")";
+            this.ctx.font = "35px vcr";
+            this.ctx.fillText(this.announceOvertake, GAME_WIDTH/1.8, 60);
+            opacityOvertake = opacityOvertake - 0.01;
+            this.ctx.closePath();
+
+            //  Opposite Lane driving
+            if (isDrivingOppositeLane) {
+                this.closeCall()
+                this.ctx.beginPath();
+                opacityOppositeLane = 1.0;
+                this.ctx.fillStyle = "rgba(255, 255, 255, "+ opacityOppositeLane +")";
+                this.ctx.font = "35px vcr";
+                this.ctx.fillText(this.announceOppositeLane, GAME_WIDTH/6, 60);
+                this.ctx.closePath();
+            } else if(opacityOppositeLane > 0) {
+                this.ctx.beginPath();
+                this.ctx.fillStyle = "rgba(255, 255, 255, "+ opacityOppositeLane +")";
+                this.ctx.font = "35px vcr";
+                this.ctx.fillText(this.announceOppositeLane, GAME_WIDTH/6, 60);
+                this.ctx.closePath();
+                opacityOppositeLane = opacityOppositeLane - 0.01;
             }
+            //  Close Calls
+            this.ctx.beginPath();
+            this.ctx.fillStyle = "rgba(255, 255, 255, "+ opacityCloseCall+")";
+            this.ctx.font = "35px vcr";
+            this.ctx.fillText(this.announceCloseCall, GAME_WIDTH/6, 90);
+            opacityCloseCall = opacityCloseCall - 0.01;
+            this.ctx.closePath();
             
-            fadeOut('sfddsfs');*/
             // Set the time marker and redraw
             this.lastFrame = Date.now();
             requestAnimationFrame(this.gameLoop);
         }
         this.overTake()
+        this.drivingOpposingLane();
     }
     overTake() {
-        for (var i=0; i<this.enemies.length; i++) {
-            
+       
+        for (var i=2; i<this.enemies.length; i++) {
             if (this.enemies[i] == undefined) continue;
             else if(
                 this.enemies[i].x < this.player.x + PLAYER_WIDTH*2 &&
@@ -311,45 +352,112 @@ class Engine {
                 this.enemies[i].y < this.player.y + PLAYER_HEIGHT &&
                 this.enemies[i].y + ENEMY_HEIGHT > this.player.y &&
                 overtaken[i] === false) {
-                   //return true;
                    overtaken[i] = true;
                    
-                   
-                if(this.announce !== "Overtake!") {
+                if(this.announceOvertake !== "Overtake!") {
+                    
+                    clearTimeout(overtakeTimeout);
+                    isOvertaking = true;
+                    isScoreGoingUp = true;
+                    plusScore = "+1000"
+                    console.log(plusScore)
                     this.score += 1000;
-                    this.announce = "Overtake!"
-                    opacity = 1.0;
-                    timeout = setTimeout(() => this.announce = "", 1500);
-                    console.log(timeout)
+                    this.announceOvertake = "Overtake!"
+                    opacityOvertake = 1.0;
+                    overtakeTimeout = setTimeout(() => {
+                        plusScore = "";
+                        isOvertaking = false;
+                        this.announceOvertake = "";
+                        isScoreGoingUp = false;
+                    }, 1500);
+                } else {
+                    isOvertaking = true;
+                    isScoreGoingUp = true;
+                    plusScore = "+2000"
+                    this.score += 1000
+                    opacityOvertake = 1.0;
+                    clearTimeout(overtakeTimeout)
+                    this.announceOvertake = "Overtake!"
+                    overtakeTimeout = setTimeout(() => {
+                        plusScore = "";
+                        isOvertaking = false;
+                        this.announceOvertake = "";
+                        isScoreGoingUp = false;
+                    }, 1500);
                 }
-                else {
-                    this.score += 2000
-                    opacity = 1.0;
-                    clearTimeout(timeout)
-                    this.announce = "Overtake X2!"
-                    timeout = setTimeout(() => this.announce = "", 1500);
-                }
-
-                   
-               }
             }
+            //else isScoreGoingUp = false;
+        }
     }
-    pointsAnnounce(text) {
-
-
+    closeCall() {
+        for (var i=0; i<this.enemies.length-2; i++) {
+            if (this.enemies[i] == undefined) continue;
+            else if(
+                this.enemies[i].x < this.player.x + PLAYER_WIDTH*2 &&
+                this.enemies[i].x + ENEMY_WIDTH*2 > this.player.x &&
+                this.enemies[i].y < this.player.y + PLAYER_HEIGHT &&
+                this.enemies[i].y + ENEMY_HEIGHT > this.player.y &&
+                overtaken[i] === false) {
+                   overtaken[i] = true;
+                   
+                if(this.announceCloseCall !== "Close Call!") {
+                    clearTimeout(closeCallTimeout);
+                    //isOvertaking = true;
+                    isScoreGoingUp = true;
+                    secondPlusScore = "+3000";
+                    this.score += 3000;
+                    this.announceCloseCall = ["Close call!","You maniac!", "Get off the road!", "What's wrong with you?", "Who taught you how to drive?", "Jesus dude"][Math.floor(Math.random()*6)]
+                    opacityCloseCall = 1.0;
+                    closeCallTimeout = setTimeout(() => {
+                        secondPlusScore = "";
+                        //isOvertaking = false;
+                        this.announceCloseCall = "";
+                        isScoreGoingUp = false;
+                    }, 1500);
+                } 
+            }
+        }
     }
+
+    drivingOpposingLane() {
+        if(
+        ROAD_DEADSPACE_LEFT < this.player.x + PLAYER_WIDTH&&
+        ROAD_DEADSPACE_LEFT + leftLaneWidth > this.player.x ){
+            if(isDrivingOppositeLane === false)freezeCurrentScore = this.score;
+            plusScore = "+"+((tempShowScore+=10)-freezeCurrentScore).toString();
+            this.score += 10;
+            isScoreGoingUp = true;
+            this.announceOppositeLane = "Public Danger!";
+            isDrivingOppositeLane = true;
+        } else {
+            if(isScoreGoingUp === true && isOvertaking === false) isScoreGoingUp = false;
+            if(isOvertaking === false)plusScore = "";
+            isDrivingOppositeLane = false;
+
+        }
+    }
+
     isPlayerDead() {
         // TODO: fix this function!
         for (var i=0; i<this.enemies.length; i++) {
             if (this.enemies[i] == undefined) continue;
-            else if(this.enemies[i].x < this.player.x + PLAYER_WIDTH &&
-               this.enemies[i].x + ENEMY_WIDTH > this.player.x &&
-               this.enemies[i].y < this.player.y + PLAYER_HEIGHT &&
-               this.enemies[i].y + ENEMY_HEIGHT > this.player.y) {
+            else if (
+                this.enemies[i].x < this.player.x + PLAYER_WIDTH &&
+                this.enemies[i].x + ENEMY_WIDTH > this.player.x &&
+                this.enemies[i].y < this.player.y + PLAYER_HEIGHT-20 &&
+                this.enemies[i].y + ENEMY_HEIGHT > this.player.y) {
                    return true;
                }
             }
-            return false;
+            if (
+                ROAD_DEADSPACE_LEFT < this.player.x + PLAYER_WIDTH &&
+                ROAD_DEADSPACE_LEFT > this.player.x ) {
+                    return true;
+            } else if (
+                ROAD_DEADSPACE_RIGHT < this.player.x + PLAYER_WIDTH&&
+                ROAD_DEADSPACE_RIGHT > this.player.x ) return true;
+
+                return false;
     }
 }
 
