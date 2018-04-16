@@ -8,11 +8,11 @@ var ROAD_DEADSPACE_LEFT = 175;
 var ROAD_DEADSPACE_RIGHT = GAME_WIDTH-175;
 
 var ENEMY_WIDTH = 50;
-var ENEMY_HEIGHT = 95;
+var ENEMY_HEIGHT = 110;
 var MAX_ENEMIES = 3;
 
 var PLAYER_WIDTH = 50;
-var PLAYER_HEIGHT = 95;
+var PLAYER_HEIGHT = 110;
 
 // These two constants keep us from using "magic numbers" in our code
 var LEFT_ARROW_CODE = 37;
@@ -32,9 +32,16 @@ var playerMoveRight = false;
 var playerMoveUp = false;
 var playerMoveDown = false;
 
+//  Has this car already been overtaken?
+var overtaken = [false, false, false , false];
+var timeout;
+var opacity= 1.0;
+
 // Preload game images
 var images = {};
-["viper_south.png", "viper_north.png" ,"background.png", "player.png"].forEach(imgName => {
+["viper_up.png", "viper_down.png","truck_up.png", "truck_down.png", "audi_up.png", "audi_down.png", 
+"taxi_up.png", "taxi_down.png", "van_up.png", "van_down.png", "ambulance_up.png", "ambulance_down.png", 
+"background.png", "player.png"].forEach(imgName => {
     var img = document.createElement('img');
     img.src = 'images/' + imgName;
     images[imgName] = img;
@@ -48,11 +55,18 @@ class Enemy {
         this.y = -ENEMY_HEIGHT;
         // Each enemy should have a different speed and direction
         if(carPos == 0||carPos == 1) {
-        this.sprite = images["viper_south.png"];
-        this.speed = Math.random() / 1 + 0.50;
+            let getRandomVehiculeDown = [
+            "viper_down.png", "truck_down.png", "audi_down.png", 
+            "taxi_down.png", "van_down.png", "ambulance_down.png"];
+
+            this.sprite = images[getRandomVehiculeDown[Math.floor(Math.random()*6)]];
+            this.speed = Math.random() / 1 + 0.50;
         } 
         else if (carPos == 2||carPos == 3) {
-            this.sprite = images["viper_north.png"];
+            let getRandomVehiculeUp = [
+                "viper_up.png", "truck_up.png", "audi_up.png", 
+                "taxi_up.png", "van_up.png", "ambulance_up.png"];
+                this.sprite = images[getRandomVehiculeUp[Math.floor(Math.random()*6)]];
             this.speed = Math.random() / 10 + 0.10;
         }        
     }
@@ -157,6 +171,7 @@ class Engine {
     start() {
         this.score = 0;
         this.lastFrame = Date.now();
+        this.announce = "";
 
         // Listen for keyboard left/right and update the player
         document.addEventListener('keydown', key => {
@@ -196,13 +211,12 @@ class Engine {
     You should use this parameter to scale your update appropriately
      */
     gameLoop() {
-        console.log("playerup",playerMoveUp, "playerdown", playerMoveDown)
         // Check how long it's been since last frame
         var currentFrame = Date.now();
         var timeDiff = currentFrame - this.lastFrame;
 
         // Increase the score!
-        this.score += timeDiff;
+        //this.score += timeDiff;
 
         // Call update on all enemies
         this.enemies.forEach(enemy => enemy.update(timeDiff));
@@ -228,6 +242,7 @@ class Engine {
         this.enemies.forEach((enemy, enemyIdx) => {
             if (enemy.y > GAME_HEIGHT) {
                 delete this.enemies[enemyIdx];
+                overtaken[enemyIdx] = false;
             }
         });
         this.setupEnemies();
@@ -235,33 +250,102 @@ class Engine {
         // Check if player is dead
         if (this.isPlayerDead()) {
             // If they are dead, then it's game over!
+            this.ctx.beginPath();
             this.ctx.font = 'bold 30px Impact';
             this.ctx.fillStyle = '#ffffff';
             this.ctx.fillText(this.score + ' GAME OVER', 5, 30);
+            console.log(this.ctx.fillStyle);
+            this.ctx.closePath();
 
-            document.querySelector("@keyframes").setAttribute("style", "background-position:0px 0px;");
+            document.querySelector(".background").setAttribute("style", "animation: 0s");
         }
         else {
-            // If player is not dead, then draw the score
+            // If player is not dead, then draw the score and announcements
             this.ctx.font = 'bold 30px Impact';
-            this.ctx.fillStyle = '#ffffff';
+            //this.ctx.fillStyle = '#ffffff';
             this.ctx.fillText(this.score, 5, 30);
 
+            /*this.ctx.font = 'bold 30px Impact';
+            this.ctx.fillStyle = '#ffffff';
+            this.ctx.fillText(this.announce, GAME_WIDTH/2, 60);*/
+
+            this.ctx.beginPath();
+            this.ctx.fillStyle = "rgba(255, 0, 0, "+ opacity +")";
+            this.ctx.font = "bold 30px Impact";
+            this.ctx.fillText(this.announce, GAME_WIDTH/2, 60);
+            opacity = opacity - 0.01;
+            console.log(this.ctx.fillStyle);
+            this.ctx.closePath();
+            console.log(this.ctx.fillStyle);
+            //console.log(opacity)
+            
+            /*function fadeOut(text) {
+                var alpha = 1.0,   // full opacity
+                    interval = setInterval(function () {
+                        canvas.width = canvas.width; // Clears the canvas
+                        context.fillStyle = "rgba(255, 0, 0, " + alpha + ")";
+                        context.font = "italic 20pt Arial";
+                        context.fillText(text, 50, 50);
+                        alpha = alpha - 0.05; // decrease opacity (fade out)
+                        if (alpha < 0) {
+                            canvas.width = canvas.width;
+                            clearInterval(interval);
+                        }
+                    }, 50); 
+            }
+            
+            fadeOut('sfddsfs');*/
             // Set the time marker and redraw
             this.lastFrame = Date.now();
             requestAnimationFrame(this.gameLoop);
         }
+        this.overTake()
     }
+    overTake() {
+        for (var i=0; i<this.enemies.length; i++) {
+            
+            if (this.enemies[i] == undefined) continue;
+            else if(
+                this.enemies[i].x < this.player.x + PLAYER_WIDTH*2 &&
+                this.enemies[i].x + ENEMY_WIDTH*2 > this.player.x &&
+                this.enemies[i].y < this.player.y + PLAYER_HEIGHT &&
+                this.enemies[i].y + ENEMY_HEIGHT > this.player.y &&
+                overtaken[i] === false) {
+                   //return true;
+                   overtaken[i] = true;
+                   
+                   
+                if(this.announce !== "Overtake!") {
+                    this.score += 1000;
+                    this.announce = "Overtake!"
+                    opacity = 1.0;
+                    timeout = setTimeout(() => this.announce = "", 1500);
+                    console.log(timeout)
+                }
+                else {
+                    this.score += 2000
+                    opacity = 1.0;
+                    clearTimeout(timeout)
+                    this.announce = "Overtake X2!"
+                    timeout = setTimeout(() => this.announce = "", 1500);
+                }
+
+                   
+               }
+            }
+    }
+    pointsAnnounce(text) {
 
 
+    }
     isPlayerDead() {
         // TODO: fix this function!
         for (var i=0; i<this.enemies.length; i++) {
             if (this.enemies[i] == undefined) continue;
-            else if(this.player.x < this.enemies[i].x + ENEMY_WIDTH &&
-               this.player.x + PLAYER_WIDTH > this.enemies[i].x &&
-               this.player.y < this.enemies[i].y + ENEMY_HEIGHT &&
-               this.player.y + PLAYER_HEIGHT > this.enemies[i].y) {
+            else if(this.enemies[i].x < this.player.x + PLAYER_WIDTH &&
+               this.enemies[i].x + ENEMY_WIDTH > this.player.x &&
+               this.enemies[i].y < this.player.y + PLAYER_HEIGHT &&
+               this.enemies[i].y + ENEMY_HEIGHT > this.player.y) {
                    return true;
                }
             }
