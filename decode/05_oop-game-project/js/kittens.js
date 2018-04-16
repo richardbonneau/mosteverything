@@ -40,13 +40,17 @@ var overtaken = [false, false, false, false];
 //  Score Announcer Stuff
 var overtakeTimeout;
 var closeCallTimeout;
+var opposingLaneTimeout;
+
 var freezeCurrentScore = 0;
 var plusScore = "";
 var secondPlusScore = "";
 var tempShowScore = 0;
+
 var opacityOvertake= 0;
 var opacityOppositeLane = 0;
 var opacityCloseCall = 0;
+
 var isDrivingOppositeLane = false;
 var isOvertaking = false;
 var isScoreGoingUp = false;
@@ -61,7 +65,29 @@ var images = {};
     images[imgName] = img;
 });
 
+//  Audio
+var music = new Audio("sounds/music.mp3");
+var engine = new Audio("sounds/engine.wav");
+var madePoint = new Audio("sounds/overtake.wav");
+var madePoint2 = new Audio("sounds/overtake.wav");
+var carPass = new Audio("sounds/closecall.wav");
+var carPass2 = new Audio("sounds/closecall.wav");
+var gameover = new Audio("sounds/gameover2.wav")
 
+//  Adjust sound volume
+engine.volume = 0.5;
+carPass.volume = 0.8;
+carPass2.volume = 0.8;
+
+//  Start music
+music.play();
+//  Loop Engine sound
+engine.play();
+
+engine.addEventListener("ended", ()=> {
+    let currentTime = 0;
+    engine.play();
+}, false)
 // This section is where you will be doing most of your coding
 class Enemy {
     constructor(xPos, carPos) {
@@ -120,7 +146,6 @@ class Player {
     updateVertical(timeDiff) {
         this.y = this.y + timeDiff * this.speed;
     }
-
     render(ctx) {
         ctx.drawImage(this.sprite, this.x, this.y);
     }
@@ -266,13 +291,12 @@ class Engine {
         // Check if player is dead
         if (this.isPlayerDead()) {
             // If they are dead, then it's game over!
+            gameover.play();
             this.ctx.beginPath();
             this.ctx.font = 'bold 30px Impact';
             this.ctx.fillStyle = '#ffffff';
             this.ctx.fillText(this.score + ' GAME OVER', 5, 30);
-
             this.ctx.closePath();
-
             document.querySelector(".background").setAttribute("style", "animation: 0s");
         }
         else {
@@ -286,7 +310,7 @@ class Engine {
             this.ctx.fillText(this.score, 15, 50);
             this.ctx.closePath();
 
-            //  +Score
+            //  PLUSScore
             this.ctx.beginPath();
             if(opacityOppositeLane > 0) this.ctx.fillStyle = "rgba(255, 255, 255, "+ opacityOppositeLane +")";
             else if(opacityOvertake > 0) this.ctx.fillStyle = "rgba(255, 255, 255, "+ opacityOvertake +")";
@@ -295,7 +319,7 @@ class Engine {
             this.ctx.fillText(plusScore, 15, 80);
             this.ctx.closePath();
 
-            //  SECOND+Score
+            //  SECOND PLUSScore
             this.ctx.beginPath();
             this.ctx.fillStyle = "rgba(255, 255, 255, "+ opacityCloseCall +")";
             this.ctx.font = '25px vcr';
@@ -343,7 +367,6 @@ class Engine {
         this.drivingOpposingLane();
     }
     overTake() {
-       
         for (var i=2; i<this.enemies.length; i++) {
             if (this.enemies[i] == undefined) continue;
             else if(
@@ -357,13 +380,14 @@ class Engine {
                 if(this.announceOvertake !== "Overtake!") {
                     
                     clearTimeout(overtakeTimeout);
+                    opacityOppositeLane = 1.0;
                     isOvertaking = true;
                     isScoreGoingUp = true;
                     plusScore = "+1000"
-                    console.log(plusScore)
                     this.score += 1000;
                     this.announceOvertake = "Overtake!"
                     opacityOvertake = 1.0;
+                    madePoint.play();
                     overtakeTimeout = setTimeout(() => {
                         plusScore = "";
                         isOvertaking = false;
@@ -378,6 +402,7 @@ class Engine {
                     opacityOvertake = 1.0;
                     clearTimeout(overtakeTimeout)
                     this.announceOvertake = "Overtake!"
+                    madePoint2.play();
                     overtakeTimeout = setTimeout(() => {
                         plusScore = "";
                         isOvertaking = false;
@@ -386,7 +411,6 @@ class Engine {
                     }, 1500);
                 }
             }
-            //else isScoreGoingUp = false;
         }
     }
     closeCall() {
@@ -402,15 +426,14 @@ class Engine {
                    
                 if(this.announceCloseCall !== "Close Call!") {
                     clearTimeout(closeCallTimeout);
-                    //isOvertaking = true;
                     isScoreGoingUp = true;
                     secondPlusScore = "+3000";
                     this.score += 3000;
+                    carPass.play();
                     this.announceCloseCall = ["Close call!","You maniac!", "Get off the road!", "What's wrong with you?", "Who taught you how to drive?", "Jesus dude"][Math.floor(Math.random()*6)]
                     opacityCloseCall = 1.0;
                     closeCallTimeout = setTimeout(() => {
                         secondPlusScore = "";
-                        //isOvertaking = false;
                         this.announceCloseCall = "";
                         isScoreGoingUp = false;
                     }, 1500);
@@ -424,15 +447,16 @@ class Engine {
         ROAD_DEADSPACE_LEFT < this.player.x + PLAYER_WIDTH&&
         ROAD_DEADSPACE_LEFT + leftLaneWidth > this.player.x ){
             if(isDrivingOppositeLane === false)freezeCurrentScore = this.score;
-            plusScore = "+"+((tempShowScore+=10)-freezeCurrentScore).toString();
+            console.log(tempShowScore)
+            plusScore = "+"+(tempShowScore+=10);//((tempShowScore+=10)-freezeCurrentScore).toString();
             this.score += 10;
             isScoreGoingUp = true;
             this.announceOppositeLane = "Public Danger!";
             isDrivingOppositeLane = true;
         } else {
             if(isScoreGoingUp === true && isOvertaking === false) isScoreGoingUp = false;
-            if(isOvertaking === false)plusScore = "";
             isDrivingOppositeLane = false;
+            tempShowScore = 0;
 
         }
     }
