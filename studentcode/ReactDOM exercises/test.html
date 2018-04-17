@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html>
+<body>
+   <div id="root"></div>
+   <script>
+       var timeStampInMs = window.performance && window.performance.now && window.performance.timing && window.performance.timing.navigationStart ? window.performance.now() + window.performance.timing.navigationStart : Date.now();
+
+console.log(timeStampInMs, Date.now());
+ </script>
+</body>
+</html>

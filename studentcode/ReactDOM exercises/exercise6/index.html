@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+ <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+</head>
+<body>
+   <div id="root"></div>
+   <script>
+class Clock extends React.Component {
+    constructor() {
+        super();
+        this.state = {
+            hours: 0,
+            minutes: 0,
+            seconds: 0
+        }
+        setInterval(()=> {
+            this.setState({
+                hours: new Date().getHours(),
+                minutes: new Date().getMinutes(),
+                seconds: new Date().getSeconds()
+            })
+        }, 1000);
+    }
+    render() {
+        return React.createElement("h1", null, 
+        this.state.hours + ":" + this.state.minutes + ":" + this.state.seconds);
+    }
+}
+var root = document.querySelector("#root");
+ReactDOM.render(React.createElement(Clock), root);
+ </script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+ <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+</head>
+<body>
+   <div id="root"></div>
+   <script>
+//Create a page with a button and a div. Every time you click on the button, 
+//the div gets populated with a new random quote.
+//You should have at least 5 quotes. It is up to you to find the quote.
+
+class foo extends React.Component {
+    constructor() {
+        super();
+        this.state = {quotes: ""};
+    }
+    render() {
+        var arrOfQuotes = [
+        "Don't cry because it's over, smile because it happened. - Dr.Seuss", 
+        "Be yourself; everyone else is already taken. - Oscar Wilde", 
+        "So many books, so little time. -Frank Zappa", 
+        "You only live once, but if you do it right, once is enough. - Mae West",
+        "In three words I can sum up everything I've learned about life: it goes on. -Robert Frost"
+        ]
+        var ranQuoteButton = React.createElement("button", { onClick:()=> {
+            this.setState({quotes: this.state.quotes + " / " + arrOfQuotes[Math.floor(Math.random()*5)]})
+         }
+        }, "New Random Quote")
+
+        return React.createElement("div", null, ranQuoteButton, this.state.quotes);
+    }
+}
+
+var root = document.querySelector("#root");
+ReactDOM.render(React.createElement((foo)), root);
+
+/*array of quotes : 
+[
+"Don't cry because it's over, smile because it happened. - Dr.Seuss", 
+"Be yourself; everyone else is already taken. - Oscar Wilde", 
+"So many books, so little time. -Frank Zappa", 
+"You only live once, but if you do it right, once is enough. - Mae West",
+"In three words I can sum up everything I've learned about life: it goes on. -Robert Frost"
+]
+
+*/
+
+ </script>
+</body>
+</html>

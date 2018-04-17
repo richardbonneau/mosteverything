@@ -2,7 +2,7 @@
 var frameOne = false;
 
 var GAME_WIDTH = 840;
-var GAME_HEIGHT = 650;
+var GAME_HEIGHT = 745;
 
 var ROAD_DEADSPACE_LEFT = 90;
 var ROAD_DEADSPACE_RIGHT = GAME_WIDTH-180;
@@ -75,12 +75,12 @@ var carPass2 = new Audio("sounds/closecall.wav");
 var gameover = new Audio("sounds/gameover2.wav")
 
 //  Adjust sound volume
-engine.volume = 0.5;
+engine.volume = 0.7;
 carPass.volume = 0.8;
 carPass2.volume = 0.8;
 
 //  Start music
-music.play();
+//music.play();
 //  Loop Engine sound
 engine.play();
 
@@ -292,12 +292,19 @@ class Engine {
         if (this.isPlayerDead()) {
             // If they are dead, then it's game over!
             gameover.play();
+            music.pause();
+            engine.pause();
             this.ctx.beginPath();
-            this.ctx.font = 'bold 30px Impact';
-            this.ctx.fillStyle = '#ffffff';
-            this.ctx.fillText(this.score + ' GAME OVER', 5, 30);
+            this.ctx.font = '50px vcr';
+            this.ctx.fillStyle = '#FF0000';
+            this.ctx.fillText("FINAL SCORE: "+this.score, GAME_WIDTH/6, GAME_HEIGHT/3);
             this.ctx.closePath();
             document.querySelector(".background").setAttribute("style", "animation: 0s");
+            let restart = document.createElement("button");
+            restart.setAttribute("id", "restart");
+            restart.innerHTML="Restart";
+            document.querySelector(".background").appendChild(restart);
+
         }
         else {
             // If player is not dead, then draw the score and announcements
@@ -305,8 +312,8 @@ class Engine {
             //  Total Score
             this.ctx.beginPath();
             if(isScoreGoingUp === true) {this.ctx.fillStyle = '#FFFFFF';}
-            else {this.ctx.fillStyle = '#EE209A';}
-            this.ctx.font = '45px lazer84';
+            else {this.ctx.fillStyle = '#FF0000';}
+            this.ctx.font = '45px vcr';
             this.ctx.fillText(this.score, 15, 50);
             this.ctx.closePath();
 
@@ -330,7 +337,7 @@ class Engine {
             this.ctx.beginPath();
             this.ctx.fillStyle = "rgba(255, 255, 255, "+ opacityOvertake +")";
             this.ctx.font = "35px vcr";
-            this.ctx.fillText(this.announceOvertake, GAME_WIDTH/1.8, 60);
+            this.ctx.fillText(this.announceOvertake, GAME_WIDTH/1.8, 100);
             opacityOvertake = opacityOvertake - 0.01;
             this.ctx.closePath();
 
@@ -340,22 +347,22 @@ class Engine {
                 this.ctx.beginPath();
                 opacityOppositeLane = 1.0;
                 this.ctx.fillStyle = "rgba(255, 255, 255, "+ opacityOppositeLane +")";
-                this.ctx.font = "35px vcr";
-                this.ctx.fillText(this.announceOppositeLane, GAME_WIDTH/6, 60);
+                this.ctx.font = "30px vcr";
+                this.ctx.fillText(this.announceOppositeLane, GAME_WIDTH/6+27, 100);
                 this.ctx.closePath();
             } else if(opacityOppositeLane > 0) {
                 this.ctx.beginPath();
                 this.ctx.fillStyle = "rgba(255, 255, 255, "+ opacityOppositeLane +")";
-                this.ctx.font = "35px vcr";
-                this.ctx.fillText(this.announceOppositeLane, GAME_WIDTH/6, 60);
+                this.ctx.font = "30px vcr";
+                this.ctx.fillText(this.announceOppositeLane, GAME_WIDTH/6+27, 100);
                 this.ctx.closePath();
                 opacityOppositeLane = opacityOppositeLane - 0.01;
             }
             //  Close Calls
             this.ctx.beginPath();
             this.ctx.fillStyle = "rgba(255, 255, 255, "+ opacityCloseCall+")";
-            this.ctx.font = "35px vcr";
-            this.ctx.fillText(this.announceCloseCall, GAME_WIDTH/6, 90);
+            this.ctx.font = "30px vcr";
+            this.ctx.fillText(this.announceCloseCall, GAME_WIDTH/6+27, 140);
             opacityCloseCall = opacityCloseCall - 0.01;
             this.ctx.closePath();
             
@@ -378,9 +385,9 @@ class Engine {
                    overtaken[i] = true;
                    
                 if(this.announceOvertake !== "Overtake!") {
-                    
+                    console.log(isDrivingOppositeLane);
                     clearTimeout(overtakeTimeout);
-                    opacityOppositeLane = 1.0;
+                    //opacityOppositeLane = 1.0;
                     isOvertaking = true;
                     isScoreGoingUp = true;
                     plusScore = "+1000"
@@ -424,7 +431,9 @@ class Engine {
                 overtaken[i] === false) {
                    overtaken[i] = true;
                    
-                if(this.announceCloseCall !== "Close Call!") {
+                if(secondPlusScore === "+6000") {
+                    carPass2.pause();
+                    carPass2.currentTime = 0;
                     clearTimeout(closeCallTimeout);
                     isScoreGoingUp = true;
                     secondPlusScore = "+3000";
@@ -437,20 +446,34 @@ class Engine {
                         this.announceCloseCall = "";
                         isScoreGoingUp = false;
                     }, 1500);
-                } 
+                } else {
+                    carPass.pause();
+                    carPass.currentTime = 0;
+                    clearTimeout(closeCallTimeout);
+                    isScoreGoingUp = true;
+                    secondPlusScore = "+6000";
+                    this.score += 3000;
+                    carPass2.play();
+                    this.announceCloseCall = ["Close call!","You maniac!", "Get off the road!", "What's wrong with you?", "Who taught you how to drive?", "Jesus dude"][Math.floor(Math.random()*6)]
+                    opacityCloseCall = 1.0;
+                    closeCallTimeout = setTimeout(() => {
+                        secondPlusScore = "";
+                        this.announceCloseCall = "";
+                        isScoreGoingUp = false;
+                    }, 1500);
+                }
             }
         }
     }
-
     drivingOpposingLane() {
         if(
         ROAD_DEADSPACE_LEFT < this.player.x + PLAYER_WIDTH&&
         ROAD_DEADSPACE_LEFT + leftLaneWidth > this.player.x ){
             if(isDrivingOppositeLane === false)freezeCurrentScore = this.score;
-            console.log(tempShowScore)
             plusScore = "+"+(tempShowScore+=10);//((tempShowScore+=10)-freezeCurrentScore).toString();
             this.score += 10;
             isScoreGoingUp = true;
+            
             this.announceOppositeLane = "Public Danger!";
             isDrivingOppositeLane = true;
         } else {

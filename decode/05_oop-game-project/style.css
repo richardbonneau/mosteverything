@@ -1,10 +1,16 @@
+#restart {
+    
+    height: 50px;
+    width: 100px;
+    margin: 0 auto;
+}
 .background {
     z-index:-1;
     position: fixed;
     background:url("images/background.png");
     animation:2.2s scroll infinite linear;
     top:0;
-    left:0;
+    left:18.5%;
     width: 840px;
     height: 100%;   
 }
@@ -14,7 +20,7 @@
     }
   }
 @font-face {
-    font-family: "lazer84";
+    font-family: "lazer";
     src: url("misc/Lazer84.ttf");
 }
 @font-face {
@@ -28,6 +34,14 @@
 
 canvas {
     background: transparent;
+    left: 50%;
+}
+.container {
+    width: 100%;
+    text-align: center;
+}
+body {
+    background: black;
 }
 /*
 #testLazer {

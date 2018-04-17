@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+ <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+</head>
+<body>
+   <div id="root"></div>
+   <script>
+//button and div. button adds a new random number to the div
+class Foo extends React.Component {
+    constructor() {
+        super();
+        this.state = {listOfNum: 0};
+    }
+    render() {
+        var button = React.createElement("button", {onClick:()=>{
+            this.setState({listOfNum: this.state.listOfNum + ", " +Math.floor(Math.random()*100)})
+         }
+        }, "New Number")
+        return React.createElement("div", null, this.state.listOfNum, button);
+    }
+}
+var root = document.querySelector("#root");
+ReactDOM.render(React.createElement(Foo, null), root);
+ </script>
+</body>
+</html>
