@@ -4,13 +4,9 @@ var elem = React.createElement(
     null,
     React.createElement(
         "a",
-        { href: "www.google.com2" },
+        { href: "http://www.google.com" },
         "Google.com"
     ),
-    React.createElement(
-        "div",
-        { id: "somedivid" },
-        "some div"
-    )
+    React.createElement("div", { id: "somedivid" })
 );
 ReactDOM.render(elem, rootdiv);
