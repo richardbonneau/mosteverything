@@ -1,0 +1,10 @@
+.App {
+  text-align: center;
+}
+
+#button {
+  width: 125px;
+  height: 30px;
+  background-color: black;
+  color: white;
+}
