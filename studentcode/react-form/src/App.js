@@ -2,12 +2,14 @@ import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
 
+
 class App extends React.Component {
   constructor() {
     super();
     this.state = {
-      firstNameValue: '',
-      lastNameValue: ''
+      firstNameValue: "",
+      lastNameValue: "",
+      feedback: ""
   };
   }
   isFirstNameInputPopulated = false;
@@ -26,10 +28,21 @@ class App extends React.Component {
     } else this.isLastNameInputPopulated = false;
 
   }
+  handleChangeFeedback = (event) => {
+    this.setState({feedback: event.target.value});
+
+  }
   handleSubmit = (event) => {
     alert('Hi ' + this.state.firstNameValue + ' ' + this.state.lastNameValue);
     event.preventDefault();
   }
+  handleSubmitFeedback = (event) => {
+    console.log(this.state.feedback.length())
+    event.preventDefault();
+    alert("Submitted " + this.state.feedback.length())
+    
+  }
+
   clearFields = () => {
     this.setState({
       firstNameValue: '',
@@ -48,7 +61,9 @@ class App extends React.Component {
  
   render = () => {
     return (
-      <div>
+
+      <div style={{display: "flex"}}>
+      <div className="hello" id="bye"></div>
       <form onSubmit={this.handleSubmit}>
       <div>
           First Name:
@@ -66,6 +81,18 @@ class App extends React.Component {
       </form>
       <button onClick={this.clearFields}>Clear</button>
       <button onClick={this.swapFields}>Swap</button>
+      <form onSubmit={this.handleSubmitFeedback}>
+      <div>
+          Give us feedback on the page:
+          <input type="text" value={this.state.feedback} style={{height: "70px"}} 
+          onChange={this.handleChangeFeedback} />
+          </div>
+          {
+            this.isFirstNameInputPopulated && this.isLastNameInputPopulated ? 
+          <input type="submit" value="Submit Feedback" />
+          : <div />
+          }
+      </form>
       </div>
     );
   }

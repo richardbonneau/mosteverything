@@ -5,22 +5,23 @@ class App extends Component {
   constructor() {
     super()
     this.state = {
-      hasButtonBeenClicked: false
+      hasButtonBeenClicked: false,
+      buttons: [<button onClick={this.addButton}>Click me</button>],
+      bools: [false]
+    }
+    this.newButton = <button onClick={this.addButton}>Click me</button>
+  }
+  addButton = () => {
+    if(this.state.bools.every((element)=> element == true)) {
+      this.state.bools.push(false)
+      this.state.buttons.push(this.newButton)
+      this.setState({})
     }
   }
   render() {
-    let addButton = ()=> {
-      this.setState({hasButtonBeenClicked: this.state.hasButtonBeenClicked = true})
-
-      if(this.state.hasButtonBeenClicked === true) {
-
-        let newButton = <button id='button' onClick={addButton}>Click me</button>
-      }
-    }
     return (
       <div className="App">
-      <button id='button' onClick={addButton}>Click me</button>
-      
+      <div>{this.state.buttons}</div>
       </div>
     );
   }

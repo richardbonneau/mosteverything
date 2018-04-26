@@ -37,10 +37,3 @@ class App extends Component {
 
 export default App;
 
-import Biggify from './Biggify.js'
-class App extends Component {
-  render() {
-    return (<Biggify
-        bigText="Big"/>);
-  }
-}

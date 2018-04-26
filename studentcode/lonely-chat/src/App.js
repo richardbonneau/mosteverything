@@ -6,13 +6,12 @@ class App extends Component {
     super()
     this.state = {
       messageListEmilie: [],
-      messageListJacques: [],
+      messageListRosie: [],
       inputTextEmilie: '',
-      inputTextJacques: '',
+      inputTextRosie: '',
       username: '',
       inputUsername: '',
       renderUsernamePick: true,
-      renderChatroom: false,
       room: 'none'
     }
   }
@@ -31,20 +30,20 @@ class App extends Component {
  handleChangeEmilie = (event) => {
    this.setState({inputTextEmilie: event.target.value});
  }
- // Bot code Jacques
- handleSubmitJacques = (event) => {
+ // Bot code Rosie
+ handleSubmitRosie = (event) => {
   event.preventDefault();
-  this.state.messageListJacques.push(this.state.username + ": " + this.state.inputTextJacques);
+  this.state.messageListRosie.push(this.state.username + ": " + this.state.inputTextRosie);
   setTimeout(()=> {
     let botPossibleAnswers = [
 "Coding. Robot. Javascript. Beep.", "Click here if you are not a robot", "I eat and drink like a human"];
-    this.state.messageListJacques.push("Jacques: " + botPossibleAnswers[Math.floor(Math.random()*3)]);
+    this.state.messageListRosie.push("Rosie: " + botPossibleAnswers[Math.floor(Math.random()*3)]);
     this.setState({});
    }, 1000)
-  this.setState({inputTextJacques: ''});
+  this.setState({inputTextRosie: ''});
 }
-handleChangeJacques = (event) => {
-  this.setState({inputTextJacques: event.target.value});
+handleChangeRosie = (event) => {
+  this.setState({inputTextRosie: event.target.value});
 }
  // Submit username Code
  handleSubmitUsername = (event) => {
@@ -59,7 +58,7 @@ handleChangeJacques = (event) => {
  openEmilieChat = () => {
     this.setState({room: "em"})
  }
- openJacquesChat = () => {
+ openRosieChat = () => {
       this.setState({room: "jac"})
  }
   render() {
@@ -80,12 +79,13 @@ handleChangeJacques = (event) => {
         <li>
         <a href="#" onClick={this.openEmilieChat}>Emilie Chatroom</a>
         </li>
-        <a href="#" onClick={this.openJacquesChat}>Jacques Chatroom</a>
+        <a href="#" onClick={this.openRosieChat}>Rosie Chatroom</a>
         </ul>
 
     <div style={{flexGrow:'0.2'}} />
 
       <div style={{flexGrow:'1'}}>
+
       {
         this.state.room === 'none' ? <div /> :
         this.state.room === "em" ?
@@ -98,12 +98,12 @@ handleChangeJacques = (event) => {
           <input type='submit' value='submit' />
           </form> 
           :  
-          <form onSubmit={this.handleSubmitJacques}>
-    <h2>Thank you {this.state.username}. You may start chatting with Jacques!</h2>
+          <form onSubmit={this.handleSubmitRosie}>
+    <h2>Thank you {this.state.username}. You may start chatting with Rosie!</h2>
     <ul className='App'>
-    {this.state.messageListJacques.map((msg)=> <li>{msg}</li>)}        
+    {this.state.messageListRosie.map((msg)=> <li>{msg}</li>)}        
     </ul>
-      <input type='text' value={this.state.inputTextJacques} onChange={this.handleChangeJacques} />
+      <input type='text' value={this.state.inputTextRosie} onChange={this.handleChangeRosie} />
       <input type='submit' value='submit' />
       </form>
       }
